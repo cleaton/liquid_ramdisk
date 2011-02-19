@@ -10,7 +10,3 @@ esac
 echo 90 > /sys/devices/system/cpu/cpu0/cpufreq/ondemand/up_threshold
 echo 30 > /sys/devices/system/cpu/cpu0/cpufreq/ondemand/down_differential
 echo 500000 > /sys/devices/system/cpu/cpu0/cpufreq/ondemand/sampling_rate
-
-mount -oremount,rw /system
-cp /modules/bcm4329.ko /system/lib/modules/bcm4329.ko
-mount -oremount,ro /system
