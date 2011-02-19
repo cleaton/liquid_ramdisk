@@ -16,7 +16,7 @@ loglevel 3
     export ANDROID_ASSETS /system/app
     export ANDROID_DATA /data
     export DOWNLOAD_CACHE /cache/download
-    export EXTERNAL_STORAGE /sdcard
+    export EXTERNAL_STORAGE /mnt/sdcard
     export ASEC_MOUNTPOINT /mnt/asec
     export LOOP_MOUNTPOINT /mnt/obb
     export SD_EXT_DIRECTORY /sd-ext
@@ -320,7 +320,7 @@ on boot
     import /system/etc/init.local.rc
 
 # Run sysinit
-    start sysinit
+    exec /system/bin/sysinit
 
     class_start default
 
@@ -463,9 +463,5 @@ service qmuxd /sbin/qmuxd.sh
 
 service dumpstate /system/bin/dumpstate -s
     socket dumpstate stream 0660 shell log
-    disabled
-    oneshot
-
-service sysinit /system/bin/logwrapper /system/xbin/busybox run-parts /system/etc/init.d
     disabled
     oneshot
