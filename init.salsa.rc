@@ -7,18 +7,21 @@ on property:dev.bootcomplete=1
 	start dhcp-service
 
 on boot
+# Bluetooth 
     chown bluetooth bluetooth /sys/module/bluetooth_power/parameters/power
-    chown wifi wifi /sys/module/wifi_power/parameters/power
     chown bluetooth bluetooth /sys/class/rfkill/rfkill0/type
     chown bluetooth bluetooth /sys/class/rfkill/rfkill0/state
     chown bluetooth bluetooth /proc/bluetooth/sleep/proto
     chown system system /sys/module/sco/parameters/disable_esco
-    chmod 0660 /sys/module/bluetooth_power/parameters/power
-    chmod 0660 /sys/module/wifi_power/parameters/power
-    chmod 0660 /sys/class/rfkill/rfkill0/state
-    chmod 0660 /proc/bluetooth/sleep/proto
+    chmod 0666 /sys/module/bluetooth_power/parameters/power
+    chmod 0666 /sys/class/rfkill/rfkill0/state
+    chmod 0666 /proc/bluetooth/sleep/proto
     chown bluetooth bluetooth /dev/ttyHS1
-    chmod 0660 /dev/ttyHS1
+    chown bluetooth bluetooth /dev/ttyHS0
+    write /sys/class/rfkill/rfkill0/state 0
+    chmod 0666 /dev/ttyHS1
+    chmod 0666 /dev/ttyHS0
+    
     chown system system /sys/bus/platform/devices/msm_sdcc.1/polling
     chown system system /sys/bus/platform/devices/msm_sdcc.2/polling
     chown system system /sys/bus/platform/devices/msm_sdcc.3/polling
@@ -29,28 +32,37 @@ on boot
     symlink /dev/msm_pcm /dev/msm_pcm_out
     chown system audio /dev/msm_pcm
     chmod 0660 /dev/msm_pcm
+
+# Wifi 
+    chown wifi wifi /sys/module/wifi_power/parameters/power
+    chmod 0666 /sys/module/wifi_power/parameters/power
     mkdir /data/misc/wifi 0770 wifi wifi
     mkdir /data/misc/wifi/sockets 0770 wifi wifi
+    chown dhcp dhcp /data/misc/dhcp
 
+# Fast dormancy settings
+    setprop ro.ril.fast.dormancy.rule 1
+    setprop ro.ril.fd.scron.timeout 4
+    setprop ro.ril.fd.scroff.timeout 3
 
 # Enable MASS storage on SDCARD
     write /sys/devices/platform/mass_storage/lun0/file /dev/block/mmcblk0p1
 
-service acer_log /system/bin/alog
-   user root
-   group system
-   oneshot
+#service acer_log /system/bin/alog
+#   user root
+#   group system
+#   oneshot
 
-service airbaggy /system/bin/airbaggy
-   user root
-   group system
-   oneshot
+#service airbaggy /system/bin/airbaggy
+#   user root
+#   group system
+#   oneshot
 
-on property:persist.service.alog.enable=1
-	start acer_log
+#on property:persist.service.alog.enable=1
+#	start acer_log
 
-on property:persist.service.alog.enable=0
-	stop acer_log
+#on property:persist.service.alog.enable=0
+#	stop acer_log
 
 on property:init.svc.hciattach=running
     write /sys/devices/virtual/bluetooth/hci0/idle_timeout 7000
@@ -85,13 +97,12 @@ service salsa-sh /system/bin/sh /init.salsa.sh
     user root
     oneshot
 
-service wifibtap /system/bin/wifibtap
-    user root
-    group root
-    oneshot
+#service wifibtap /system/bin/wifibtap
+#    user root
+#    group root
+#    oneshot
 
-service hciattach /system/bin/brcm_patchram_plus --enable_hci --enable_lpm \
-    --baudrate 3000000 --patchram /etc/firmware/BCM4325.hcd /dev/ttyHS1
+service hciattach /system/bin/brcm_patchram_plus --enable_hci --baudrate 3000000 --patchram /etc/firmware/BCM4325.hcd /dev/ttyHS1
     user bluetooth
     group bluetooth net_bt_admin
     disabled
