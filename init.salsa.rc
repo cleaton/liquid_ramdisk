@@ -103,7 +103,7 @@ service salsa-sh /system/bin/sh /init.salsa.sh
 on property:ril.gcf="1"
     setprop net.tcp.buffersize.gprs    4094,87380,110208,4096,16384,110208
     
-service hciattach /system/bin/brcm_patchram_plus --enable_hci --baudrate 3000000 --patchram /etc/firmware/BCM4325.hcd /dev/ttyHS1
+service hciattach /system/bin/brcm_patchram_plus --enable_hci --baudrate 3500000 --patchram /etc/firmware/BCM4325.hcd /dev/ttyHS1
     user bluetooth
     group bluetooth net_bt_admin
     disabled
