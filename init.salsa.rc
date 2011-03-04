@@ -1,10 +1,3 @@
-service dhcp-service /system/bin/netcfg eth0 dhcp
-	oneshot
-
-on property:dev.bootcomplete=1
-	stop dhcp-service
-	start dhcp-service
-
 on boot
 # Bluetooth 
     chown bluetooth bluetooth /sys/module/bluetooth_power/parameters/power
@@ -12,14 +5,12 @@ on boot
     chown bluetooth bluetooth /sys/class/rfkill/rfkill0/state
     chown bluetooth bluetooth /proc/bluetooth/sleep/proto
     chown system system /sys/module/sco/parameters/disable_esco
-    chmod 0666 /sys/module/bluetooth_power/parameters/power
-    chmod 0666 /sys/class/rfkill/rfkill0/state
-    chmod 0666 /proc/bluetooth/sleep/proto
+    chmod 0660 /sys/module/bluetooth_power/parameters/power
+    chmod 0660 /sys/class/rfkill/rfkill0/state
+    chmod 0660 /proc/bluetooth/sleep/proto
     chown bluetooth bluetooth /dev/ttyHS1
-    chown bluetooth bluetooth /dev/ttyHS0
     write /sys/class/rfkill/rfkill0/state 0
     chmod 0666 /dev/ttyHS1
-    chmod 0666 /dev/ttyHS0
     
     chown system system /sys/bus/platform/devices/msm_sdcc.1/polling
     chown system system /sys/bus/platform/devices/msm_sdcc.2/polling
@@ -34,7 +25,7 @@ on boot
 
 # Wifi 
     chown wifi wifi /sys/module/wifi_power/parameters/power
-    chmod 0666 /sys/module/wifi_power/parameters/power
+    chmod 0660 /sys/module/wifi_power/parameters/power
     mkdir /data/misc/wifi 0770 wifi wifi
     mkdir /data/misc/wifi/sockets 0770 wifi wifi
     chown dhcp dhcp /data/misc/dhcp
@@ -45,31 +36,26 @@ on boot
     setprop ro.ril.fd.scroff.timeout 3
 
 # Enable MASS storage on SDCARD
-    write /sys/devices/platform/mass_storage/lun0/file /dev/block/mmcblk0p1
+    write /sys/devices/platform/msm_hsusb/gadget/lun0/file /dev/block/mmcblk0p1
 
-#service acer_log /system/bin/alog
-#   user root
-#   group system
-#   oneshot
-
-#service airbaggy /system/bin/airbaggy
-#   user root
-#   group system
-#   oneshot
-
-#on property:persist.service.alog.enable=1
-#	start acer_log
-
-#on property:persist.service.alog.enable=0
-#	stop acer_log
+# Adjust socket buffer to enlarge TCP receive window for high bandwidth
+    write /proc/sys/net/ipv4/tcp_adv_win_scale  1
 
 on property:init.svc.hciattach=running
     write /sys/devices/virtual/bluetooth/hci0/idle_timeout 7000
     write /proc/bluetooth/sleep/proto 1
 
+on property:ril.gcf="1"
+    setprop net.tcp.buffersize.gprs    4094,87380,110208,4096,16384,110208
+
 on property:init.svc.hciattach=stopped
     write /proc/bluetooth/sleep/proto 0
 
+service hciattach /system/bin/brcm_patchram_plus --enable_hci --enable_lpm \
+    --baudrate 3500000 --patchram /etc/firmware/BCM4325.hcd /dev/ttyHS1
+    user bluetooth
+    group bluetooth net_bt_admin
+    disabled
 
 service wpa_supplicant /system/bin/wpa_supplicant \
     -Dwext -ieth0 -c/data/misc/wifi/wpa_supplicant.conf
@@ -88,25 +74,23 @@ service dhcpcd /system/bin/dhcpcd -ABKL
 on property:init.svc.wpa_supplicant=stopped
     stop dhcpcd
 
-service sensor-daemon /system/bin/sensorserver_yamaha
-    user system
-    group system
+#service sensor-daemon /system/bin/sensorserver_yamaha
+#    user system
+#    group system
 
 service salsa-sh /system/bin/sh /init.salsa.sh
     user root
     oneshot
 
-#service wifibtap /system/bin/wifibtap
-#    user root
-#    group root
-#    oneshot
-on property:ril.gcf="1"
-    setprop net.tcp.buffersize.gprs    4094,87380,110208,4096,16384,110208
-    
-service hciattach /system/bin/brcm_patchram_plus --enable_lpm --enable_hci --baudrate 3500000 --patchram /etc/firmware/BCM4325.hcd /dev/ttyHS1
-    user bluetooth
-    group bluetooth net_bt_admin
-    disabled
+service qmuxd /sbin/qmuxd.sh
+    user root
+    group root
+    oneshot
+
+service mountbind /sbin/mountbind.sh
+    user root
+    group root
+    oneshot
 
 service ifcfg_new /system/bin/ifconfig eth0 up
     disabled
@@ -114,3 +98,10 @@ service ifcfg_new /system/bin/ifconfig eth0 up
 
 service dhcp-service /system/bin/netcfg eth0 dhcp
 	oneshot
+
+on property:dev.bootcomplete=1
+	stop dhcp-service
+	start dhcp-service
+	
+
+service port-bridge /system/bin/port-bridge /dev/smd0 /dev/ttyGS0 &

@@ -327,11 +327,6 @@ on boot
 ## Daemon processes to be run by init.
 ##
 
-service mountbind /sbin/mountbind.sh
-    user root
-    group root
-    oneshot
-
 service ueventd /sbin/ueventd
     critical
 
@@ -455,11 +450,6 @@ service keystore /system/bin/keystore /data/misc/keystore
     user keystore
     group keystore
     socket keystore stream 666
-
-service qmuxd /sbin/qmuxd.sh
-    user root
-    group root
-    oneshot
 
 service dumpstate /system/bin/dumpstate -s
     socket dumpstate stream 0660 shell log
