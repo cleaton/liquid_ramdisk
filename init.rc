@@ -191,13 +191,6 @@ on post-fs
     chmod 0770 /data/lost+found
     chown root root /cache/lost+found
     chmod 0770 /cache/lost+found
-    chmod 0777 /dev/avr
-    chmod 0777 /dev/i2c-0
-    chmod 0777 /dev/isl29018
-    chmod 0777 /dev/smb380
-    chmod 0777 /dev/tca6507
-    chmod 0777 /dev/tpa2018
-    chmod 0666 /dev/pmem_smipool
 
     # allow net_raw to have access to /dev/socket directory
     chown root net_raw /dev/socket
@@ -299,14 +292,6 @@ on boot
     chown system system /sys/kernel/ipv4/tcp_rmem_def
     chown system system /sys/kernel/ipv4/tcp_rmem_max
     chown root radio /proc/cmdline
-    chown root radio /dev/oncrpc/30000016:d6bb93e6
-    chown root radio /dev/oncrpc/30000000:fd767954
-    chown root radio /dev/oncrpc/30000019:821a1945
-    chown root radio /dev/oncrpc/3000003c:beb78360
-    chown root radio /dev/oncrpc/30000012:00010000
-    chown root radio /dev/oncrpc/30000003:d03123cc
-    chown root radio /dev/oncrpc/3000000e:00040000
-    chown root radio /dev/diag
 
 # Define TCP buffer sizes for various networks
 #   ReadMin, ReadInitial, ReadMax, WriteMin, WriteInitial, WriteMax,
@@ -326,7 +311,6 @@ on boot
 
 ## Daemon processes to be run by init.
 ##
-
 service ueventd /sbin/ueventd
     critical
 
@@ -368,7 +352,7 @@ service netd /system/bin/netd
 
 service debuggerd /system/bin/debuggerd
 
-service ril-daemon /sbin/rild.sh
+service ril-daemon /system/bin/rild
     socket rild stream 660 root radio
     socket rild-debug stream 660 radio system
     user root
