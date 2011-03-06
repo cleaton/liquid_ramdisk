@@ -22,12 +22,21 @@ on boot
     symlink /dev/msm_pcm /dev/msm_pcm_out
     chown system audio /dev/msm_pcm
     chmod 0660 /dev/msm_pcm
+    chown root radio /dev/oncrpc/30000016:d6bb93e6
+    chown root radio /dev/oncrpc/30000000:fd767954
+    chown root radio /dev/oncrpc/30000019:821a1945
+    chown root radio /dev/oncrpc/3000003c:beb78360
+    chown root radio /dev/oncrpc/30000012:00010000
+    chown root radio /dev/oncrpc/30000003:d03123cc
+    chown root radio /dev/oncrpc/3000000e:00040000
+    chown root radio /dev/diag
 
 # Wifi 
     chown wifi wifi /sys/module/wifi_power/parameters/power
     chmod 0660 /sys/module/wifi_power/parameters/power
     mkdir /data/misc/wifi 0770 wifi wifi
     mkdir /data/misc/wifi/sockets 0770 wifi wifi
+    mkdir /data/misc/dhcp 0770 dhcp dhcp
     chown dhcp dhcp /data/misc/dhcp
 
 # Fast dormancy settings
@@ -104,4 +113,4 @@ on property:dev.bootcomplete=1
 	start dhcp-service
 	
 
-service port-bridge /system/bin/port-bridge /dev/smd0 /dev/ttyGS0 &
+#service port-bridge /system/bin/port-bridge /dev/smd0 /dev/ttyGS0 &
